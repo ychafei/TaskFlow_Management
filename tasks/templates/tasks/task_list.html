@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager</title>
+    <script>
+        function addTaskField() {
+            let taskContainer = document.getElementById("task-container");
+            let taskCount = taskContainer.getElementsByClassName("task-input").length;
+
+            let div = document.createElement("div");
+            div.classList.add("task-input");
+
+            div.innerHTML = `
+                <input type="text" name="title" placeholder="Task Title" required>
+                <select name="status">
+                    <option value="not_completed">❌ Not Completed</option>
+                    <option value="in_progress">🔄 In Progress</option>
+                    <option value="completed">✅ Completed</option>
+                </select>
+            `;
+
+            taskContainer.appendChild(div);
+        }
+    </script>
+</head>
+<body>
+
+    <h1>Task Manager</h1>
+
+    <form method="POST">
+        {% csrf_token %}
+        <div id="task-container">
+            <div class="task-input">
+                <input type="text" name="title" placeholder="Task Title" required>
+                <select name="status">
+                    <option value="not_completed">❌ Not Completed</option>
+                    <option value="in_progress">🔄 In Progress</option>
+                    <option value="completed">✅ Completed</option>
+                </select>
+            </div>
+        </div>
+        
+        <button type="button" onclick="addTaskField()">➕ Add More Tasks</button>
+        <br><br>
+        <button type="submit">Submit</button>
+    </form>
+
+    <hr>
+
+    <h2>Existing Tasks</h2>
+    {% if tasks %}
+        <ul>
+            {% for task in tasks %}
+                <li>
+                    <strong>{{ task.title }}</strong> - 
+                    {% if task.status == "completed" %}
+                        ✅ <strong>Completed</strong>
+                    {% elif task.status == "in_progress" %}
+                        🔄 <strong>In Progress</strong>
+                    {% else %}
+                        ❌ <strong>Not Completed</strong>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+
+        <form method="POST" action="{% url 'remove_tasks' %}">
+            {% csrf_token %}
+            <button type="submit">🗑️ Remove All Active Tasks</button>
+        </form>
+    {% else %}
+        <p>No active tasks available.</p>
+    {% endif %}
+
+</body>
+</html>
