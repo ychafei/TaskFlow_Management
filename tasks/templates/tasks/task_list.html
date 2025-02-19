@@ -4,57 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Task Manager</title>
-    <script>
-        function addTaskField() {
-            let taskContainer = document.getElementById("task-container");
-            let taskCount = taskContainer.getElementsByClassName("task-input").length;
-
-            let div = document.createElement("div");
-            div.classList.add("task-input");
-
-            div.innerHTML = `
-                <input type="text" name="title" placeholder="Task Title" required>
-                <select name="status">
-                    <option value="not_completed">❌ Not Completed</option>
-                    <option value="in_progress">🔄 In Progress</option>
-                    <option value="completed">✅ Completed</option>
-                </select>
-            `;
-
-            taskContainer.appendChild(div);
-        }
-    </script>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'tasks/styles.css' %}">
 </head>
 <body>
-
     <h1>Task Manager</h1>
-
-    <form method="POST">
+    
+    <form method="POST" action="">
         {% csrf_token %}
-        <div id="task-container">
-            <div class="task-input">
-                <input type="text" name="title" placeholder="Task Title" required>
-                <select name="status">
-                    <option value="not_completed">❌ Not Completed</option>
-                    <option value="in_progress">🔄 In Progress</option>
-                    <option value="completed">✅ Completed</option>
-                </select>
-            </div>
+        <div id="task-fields">
+            <label for="task">Task:</label>
+            <input type="text" name="task" required>
+            <select name="status">
+                <option value="not_completed">Not Completed</option>
+                <option value="in_progress">In Progress</option>
+                <option value="completed">Completed</option>
+            </select>
         </div>
-        
         <button type="button" onclick="addTaskField()">➕ Add More Tasks</button>
         <br><br>
         <button type="submit">Submit</button>
     </form>
-
+    
     <hr>
-
+    
     <h2>Existing Tasks</h2>
     {% if tasks %}
         <ul>
             {% for task in tasks %}
                 <li>
-                    <strong>{{ task.title }}</strong> - 
+                    <strong>{{ task.title }}</strong> -
                     {% if task.status == "completed" %}
                         ✅ <strong>Completed</strong>
                     {% elif task.status == "in_progress" %}
@@ -65,14 +44,42 @@
                 </li>
             {% endfor %}
         </ul>
-
-        <form method="POST" action="{% url 'remove_tasks' %}">
-            {% csrf_token %}
-            <button type="submit">🗑️ Remove All Active Tasks</button>
-        </form>
+        <button onclick="removeTasks()">🗑️ Remove All Active Tasks</button>
     {% else %}
         <p>No active tasks available.</p>
     {% endif %}
 
+    <script>
+        function addTaskField() {
+            let container = document.getElementById("task-fields");
+            let inputField = document.createElement("input");
+            inputField.setAttribute("type", "text");
+            inputField.setAttribute("name", "task");
+            inputField.required = true;
+
+            let selectField = document.createElement("select");
+            selectField.setAttribute("name", "status");
+            selectField.innerHTML = `
+                <option value="not_completed">Not Completed</option>
+                <option value="in_progress">In Progress</option>
+                <option value="completed">Completed</option>
+            `;
+
+            container.appendChild(document.createElement("br"));
+            container.appendChild(inputField);
+            container.appendChild(selectField);
+        }
+        
+        function removeTasks() {
+            fetch("/tasks/remove_all/", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}"
+                }
+            }).then(() => {
+                location.reload();
+            });
+        }
+    </script>
 </body>
 </html>
