@@ -3,16 +3,19 @@ from .models import Task
 
 def task_list(request):
     if request.method == "POST":
-        task_title = request.POST.get("task")
-        task_status = request.POST.get("status")
-        if task_title:  # Ensure at least one task is entered
-            Task.objects.create(title=task_title, status=task_status)
-        return redirect("task_list")  # Refresh page to show updated tasks
+        task_titles = request.POST.getlist("task[]")  # Get multiple tasks
+        task_statuses = request.POST.getlist("status[]")  # Get multiple statuses
 
-    tasks = Task.objects.all()
+        for title, status in zip(task_titles, task_statuses):
+            if title.strip():  # Prevent saving empty tasks
+                Task.objects.create(title=title, status=status)
+
+        return redirect("task_list")  # Refresh to display all tasks
+
+    tasks = Task.objects.all()  # Fetch all tasks from database
     return render(request, "tasks/task_list.html", {"tasks": tasks})
 
 def remove_tasks(request):
     if request.method == "POST":
         Task.objects.all().delete()  # Deletes all tasks
-    return redirect("task_list")  # Redirect even if accessed via GET
+        return redirect("task_list")
