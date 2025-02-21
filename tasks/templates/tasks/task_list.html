@@ -44,7 +44,10 @@
                 </li>
             {% endfor %}
         </ul>
-        <button onclick="removeTasks()">🗑️ Remove All Active Tasks</button>
+        <form method="POST" action="{% url 'remove_tasks' %}">
+            {% csrf_token %}
+            <button type="submit">🗑️ Remove All Active Tasks</button>
+        </form>
     {% else %}
         <p>No active tasks available.</p>
     {% endif %}
@@ -68,17 +71,6 @@
             container.appendChild(document.createElement("br"));
             container.appendChild(inputField);
             container.appendChild(selectField);
-        }
-        
-        function removeTasks() {
-            fetch("/tasks/remove_all/", {
-                method: "POST",
-                headers: {
-                    "X-CSRFToken": "{{ csrf_token }}"
-                }
-            }).then(() => {
-                location.reload();
-            });
         }
     </script>
 </body>

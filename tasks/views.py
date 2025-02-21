@@ -3,16 +3,16 @@ from .models import Task
 
 def task_list(request):
     if request.method == "POST":
-        title = request.POST.get("title")
-        status = request.POST.get("status", "not_completed")  # Default to not completed
-        if title:  # Ensure at least one task is added
-            Task.objects.create(title=title, status=status)
-        return redirect("task_list")
+        task_title = request.POST.get("task")
+        task_status = request.POST.get("status")
+        if task_title:  # Ensure at least one task is entered
+            Task.objects.create(title=task_title, status=task_status)
+        return redirect("task_list")  # Refresh page to show updated tasks
 
     tasks = Task.objects.all()
     return render(request, "tasks/task_list.html", {"tasks": tasks})
 
 def remove_tasks(request):
     if request.method == "POST":
-        Task.objects.filter(status__in=["not_completed", "in_progress"]).delete()
-    return redirect("task_list")  # Redirect back to task list
+        Task.objects.all().delete()  # Deletes all tasks
+    return redirect("task_list")  # Redirect even if accessed via GET

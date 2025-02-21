@@ -6,7 +6,7 @@ class Task(models.Model):
         ("in_progress", "In Progress"),
         ("completed", "Completed"),
     ]
-    
+
     title = models.CharField(max_length=255)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="not_completed")
 
