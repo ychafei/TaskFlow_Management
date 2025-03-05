@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Task</title>
+</head>
+<body>
+    <h1>Edit Task</h1>
+
+    <form method="POST">
+        {% csrf_token %}
+        <label for="title">Task Title:</label>
+        <input type="text" name="title" value="{{ task.title }}" required>
+
+        <label for="status">Status:</label>
+        <select name="status">
+            <option value="not_completed" {% if task.status == "not_completed" %}selected{% endif %}>Not Completed</option>
+            <option value="in_progress" {% if task.status == "in_progress" %}selected{% endif %}>In Progress</option>
+            <option value="completed" {% if task.status == "completed" %}selected{% endif %}>Completed</option>
+        </select>
+
+        <br><br>
+        <button type="submit">Save Changes</button>
+        <a href="{% url 'task_list' %}">Cancel</a>
+    </form>
+</body>
+</html>

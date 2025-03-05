@@ -7,6 +7,19 @@
 </head>
 <body>
     <h1>Task Manager</h1>
+
+    <!-- Task Filtering -->
+    <form method="GET" action="">
+        <label for="filter_status">Filter by Status:</label>
+        <select name="filter_status" onchange="this.form.submit()">
+            <option value="all" {% if filter_status == "all" %}selected{% endif %}>All</option>
+            <option value="not_completed" {% if filter_status == "not_completed" %}selected{% endif %}>Not Completed</option>
+            <option value="in_progress" {% if filter_status == "in_progress" %}selected{% endif %}>In Progress</option>
+            <option value="completed" {% if filter_status == "completed" %}selected{% endif %}>Completed</option>
+        </select>
+    </form>
+
+    <!-- Task Submission Form -->
     <form method="POST" action="">
         {% csrf_token %}
         <div id="task-fields">
@@ -25,6 +38,7 @@
         <button type="submit">Submit</button>
     </form>
     
+    <!-- Existing Tasks Display -->
     <h2>Existing Tasks</h2>
     {% if tasks %}
         <ul>
@@ -38,6 +52,7 @@
                     {% else %}
                         ❌ <strong>Not Completed</strong>
                     {% endif %}
+                    <a href="{% url 'edit_task' task.id %}">✏️ Edit</a>
                 </li>
             {% endfor %}
         </ul>
