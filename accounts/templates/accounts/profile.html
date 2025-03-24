@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Profile | TaskFlow</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f4f6f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .profile-container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+        .profile-container h2 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .profile-info {
+            margin: 20px 0;
+            font-size: 16px;
+            color: #555;
+        }
+        .profile-actions a {
+            display: inline-block;
+            margin: 10px;
+            padding: 10px 16px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+        }
+        .profile-actions a:hover {
+            background-color: #0056b3;
+        }
+        .logout-link {
+            display: block;
+            margin-top: 25px;
+            color: #dc3545;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .logout-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-container">
+        <h2>Welcome, {{ user.username }}!</h2>
+        <p class="profile-info">You're logged in as <strong>{{ user.email }}</strong>.</p>
+
+        <div class="profile-actions">
+            <a href="{% url 'task_list' %}">📝 View Your Tasks</a>
+            <a href="{% url 'edit_profile' %}">⚙️ Edit Profile</a>
+        </div>
+
+        <a class="logout-link" href="{% url 'logout' %}">🚪 Log Out</a>
+    </div>
+</body>
+</html>

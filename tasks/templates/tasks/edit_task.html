@@ -1,28 +1,122 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Task</title>
+  <meta charset="UTF-8">
+  <title>Edit Task</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #eef2f7;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 60px auto;
+      background-color: #ffffff;
+      padding: 30px 40px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    }
+
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 30px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    label {
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    input[type="text"], select, input[type="date"] {
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    .btn-group {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 15px;
+      transition: 0.3s;
+    }
+
+    .save-btn {
+      background-color: #3b82f6;
+      color: white;
+    }
+
+    .save-btn:hover {
+      background-color: #2563eb;
+    }
+
+    .cancel-btn {
+      background-color: #94a3b8;
+      color: white;
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+      line-height: 40px;
+    }
+
+    .cancel-btn:hover {
+      background-color: #64748b;
+    }
+  </style>
 </head>
 <body>
-    <h1>Edit Task</h1>
+  <div class="container">
+    <h1>✏️ Edit Task</h1>
 
     <form method="POST">
-        {% csrf_token %}
+      {% csrf_token %}
+
+      <div>
         <label for="title">Task Title:</label>
-        <input type="text" name="title" value="{{ task.title }}" required>
+        <input type="text" name="title" id="title" value="{{ task.title }}" required>
+      </div>
 
+      <div>
         <label for="status">Status:</label>
-        <select name="status">
-            <option value="not_completed" {% if task.status == "not_completed" %}selected{% endif %}>Not Completed</option>
-            <option value="in_progress" {% if task.status == "in_progress" %}selected{% endif %}>In Progress</option>
-            <option value="completed" {% if task.status == "completed" %}selected{% endif %}>Completed</option>
+        <select name="status" id="status">
+          <option value="not_completed" {% if task.status == "not_completed" %}selected{% endif %}>❌ Not Completed</option>
+          <option value="in_progress" {% if task.status == "in_progress" %}selected{% endif %}>🔄 In Progress</option>
+          <option value="completed" {% if task.status == "completed" %}selected{% endif %}>✅ Completed</option>
         </select>
+      </div>
 
-        <br><br>
-        <button type="submit">Save Changes</button>
-        <a href="{% url 'task_list' %}">Cancel</a>
+      <div>
+        <label for="due_date">Due Date:</label>
+        <input type="date" name="due_date" id="due_date" value="{{ task.due_date|date:'Y-m-d' }}">
+      </div>
+
+      <div class="btn-group">
+        <button type="submit" class="save-btn">💾 Save Changes</button>
+        <a href="{% url 'task_list' %}" class="cancel-btn">← Cancel</a>
+      </div>
     </form>
+  </div>
 </body>
 </html>
