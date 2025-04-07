@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Welcome to TaskFlow</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f1f5f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .welcome-box {
+      text-align: center;
+      background: #ffffff;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      color: #1e293b;
+      margin-bottom: 20px;
+    }
+    p {
+      color: #475569;
+      margin-bottom: 30px;
+      font-size: 18px;
+    }
+    a {
+      text-decoration: none;
+      background-color: #3b82f6;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+    }
+    a:hover {
+      background-color: #2563eb;
+    }
+  </style>
+</head>
+<body>
+  <div class="welcome-box">
+    <h1>Welcome to TaskFlow 📝</h1>
+    <p>Organize your tasks and boost your productivity.</p>
+    <a href="{% url 'login' %}">Log In or Sign Up</a>
+  </div>
+</body>
+</html>

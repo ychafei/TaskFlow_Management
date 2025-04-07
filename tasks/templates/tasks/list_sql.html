@@ -1,0 +1,98 @@
+<!-- templates/tasks/list_sql.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Task List (SQL View)</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #eef2f7;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      background-color: #ffffff;
+      padding: 30px 40px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    }
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 25px;
+    }
+    #sort-by {
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      margin-bottom: 20px;
+    }
+    ul { list-style: none; padding: 0; }
+    li {
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .status { font-weight: 600; }
+    a { margin-left: 12px; color: #0f62fe; text-decoration: none; font-size: 14px; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📊 SQL Task Viewer</h1>
+
+    <label for="sort-by">Sort by:</label>
+    <select id="sort-by">
+      <option value="title">Title</option>
+      <option value="due_date">Due Date</option>
+      <option value="status">Status</option>
+    </select>
+
+    <ul id="task-list">
+      {% for task in tasks %}
+        <li>
+          <span>
+            {{ task.title }} -
+            <span class="status">
+              {% if task.status == "completed" %}✅ Completed
+              {% elif task.status == "in_progress" %}🔄 In Progress
+              {% else %}❌ Not Completed
+              {% endif %}
+            </span>
+            {% if task.due_date %}
+              <br><small>Due: {{ task.due_date|date:'M d, Y h:i A' }}</small>
+            {% endif %}
+          </span>
+        </li>
+      {% endfor %}
+    </ul>
+
+    <a href="{% url 'task_list' %}">← Back to Task Manager</a>
+  </div>
+
+  <script>
+    document.getElementById('sort-by').addEventListener('change', function() {
+      const sortBy = this.value;
+      fetch(`/tasks/sql/tasks/?sort_by=${sortBy}`)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          const newList = doc.getElementById('task-list');
+          document.getElementById('task-list').innerHTML = newList.innerHTML;
+        });
+    });
+  </script>
+</body>
+</html>

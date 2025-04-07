@@ -4,17 +4,13 @@
   <meta charset="UTF-8">
   <title>Task Manager</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
+    * { box-sizing: border-box; }
     body {
       font-family: 'Segoe UI', sans-serif;
       background-color: #eef2f7;
       margin: 0;
       padding: 0;
     }
-
     .container {
       max-width: 900px;
       margin: 40px auto;
@@ -23,35 +19,38 @@
       border-radius: 12px;
       box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
     }
-
-    h1 {
-      text-align: center;
-      color: #2c3e50;
-      margin-bottom: 25px;
+    h1 { text-align: center; color: #2c3e50; margin-bottom: 10px; }
+    .logout { text-align: right; margin-bottom: 20px; }
+    .logout form { display: inline; }
+    .logout button {
+      background-color: #ef4444;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
     }
-
-    form {
-      margin-bottom: 20px;
-    }
-
-    label {
-      font-weight: 500;
-    }
-
-    select, input[type="text"], input[type="date"] {
+    .logout button:hover { background-color: #dc2626; }
+    form { margin-bottom: 20px; }
+    label { font-weight: 500; }
+    select, input[type="text"], input[type="datetime-local"] {
       padding: 10px;
       border-radius: 6px;
       border: 1px solid #ccc;
       width: 100%;
       margin-bottom: 12px;
     }
-
     .task-entry {
       display: flex;
       gap: 10px;
       margin-bottom: 10px;
+      flex-wrap: wrap;
     }
-
+    .task-entry > * {
+      flex: 1;
+      min-width: 200px;
+    }
     button {
       padding: 10px 18px;
       border: none;
@@ -62,20 +61,9 @@
       cursor: pointer;
       transition: background-color 0.3s;
     }
-
-    button:hover {
-      background-color: #2563eb;
-    }
-
-    .task-list {
-      margin-top: 30px;
-    }
-
-    ul {
-      list-style: none;
-      padding: 0;
-    }
-
+    button:hover { background-color: #2563eb; }
+    .task-list { margin-top: 30px; }
+    ul { list-style: none; padding: 0; }
     li {
       background-color: #f8fafc;
       border: 1px solid #e2e8f0;
@@ -87,56 +75,34 @@
       align-items: center;
       flex-wrap: wrap;
     }
-
-    .status {
-      font-weight: 600;
-    }
-
+    .status { font-weight: 600; cursor: pointer; }
     a {
       margin-left: 12px;
       color: #0f62fe;
       text-decoration: none;
       font-size: 14px;
     }
-
-    a:hover {
-      text-decoration: underline;
-    }
-
-    .filter-form {
-      margin-bottom: 30px;
-    }
-
-    .remove-btn {
-      background-color: #ef4444;
-      margin-top: 10px;
-    }
-
-    .remove-btn:hover {
-      background-color: #dc2626;
-    }
-
-    .no-tasks {
-      text-align: center;
-      color: #64748b;
-      font-style: italic;
-    }
-
-    .task-meta {
-      font-size: 14px;
-      color: #475569;
-      margin-top: 5px;
-    }
+    a:hover { text-decoration: underline; }
+    .filter-form { margin-bottom: 30px; }
+    .remove-btn { background-color: #ef4444; margin-top: 10px; }
+    .remove-btn:hover { background-color: #dc2626; }
+    .no-tasks { text-align: center; color: #64748b; font-style: italic; }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>📋 Task Manager</h1>
 
-    <!-- Filter -->
-    <form method="GET" action="" class="filter-form">
+    <div class="logout">
+      <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit">🚪 Sign Out</button>
+      </form>
+    </div>
+
+    <form method="GET" id="filter-form" class="filter-form">
       <label for="filter_status">Filter by Status:</label>
-      <select name="filter_status" onchange="this.form.submit()">
+      <select name="filter_status" id="filter_status">
         <option value="all" {% if filter_status == "all" %}selected{% endif %}>All</option>
         <option value="not_completed" {% if filter_status == "not_completed" %}selected{% endif %}>Not Completed</option>
         <option value="in_progress" {% if filter_status == "in_progress" %}selected{% endif %}>In Progress</option>
@@ -144,8 +110,7 @@
       </select>
     </form>
 
-    <!-- Add Tasks -->
-    <form method="POST" action="">
+    <form method="POST">
       {% csrf_token %}
       <div id="task-fields">
         <div class="task-entry">
@@ -155,77 +120,103 @@
             <option value="in_progress">In Progress</option>
             <option value="completed">Completed</option>
           </select>
-          <input type="date" name="due_date[]" placeholder="Due date">
+          <input type="datetime-local" name="due_date[]" placeholder="Due Date & Time">
         </div>
       </div>
-      <button type="button" onclick="addTaskField()">➕ Add Another Task</button>
-      <br><br>
+      <button type="button" onclick="addTaskField()">➕ Add Another Task</button><br><br>
       <button type="submit">✅ Submit Tasks</button>
     </form>
 
-    <!-- Existing Tasks -->
     <div class="task-list">
       <h2>📌 Existing Tasks</h2>
-      {% if tasks %}
+      <div id="task-container">
+        {% if tasks %}
         <ul>
           {% for task in tasks %}
-            <li>
-              <div>
-                <span>{{ task.title }}</span> -
-                <span class="status">
-                  {% if task.status == "completed" %}✅ Completed
-                  {% elif task.status == "in_progress" %}🔄 In Progress
-                  {% else %}❌ Not Completed
-                  {% endif %}
-                </span>
-                {% if task.due_date %}
-                  <div class="task-meta">📅 Due: {{ task.due_date }}</div>
+          <li>
+            <span>
+              {{ task.title }} -
+              <span class="status" id="status-{{ task.id }}" onclick="toggleStatus({{ task.id }})">
+                {% if task.status == "completed" %}✅ Completed
+                {% elif task.status == "in_progress" %}🔄 In Progress
+                {% else %}❌ Not Completed
                 {% endif %}
-              </div>
+              </span>
+              {% if task.due_date %}<br>
+                <small>Due: {{ task.due_date|date:'M d, Y h:i A' }}</small>
+              {% endif %}
+              {% if task.days_left is not None %}<br>
+                {% if task.overdue %}
+                  <small style="color: red;">Overdue by {{ task.abs_days_left }} day(s)</small>
+                {% else %}
+                  <small>Due in {{ task.days_left }} day(s)</small>
+                {% endif %}
+              {% endif %}
+            </span>
+            <div>
               <a href="{% url 'edit_task' task.id %}">✏️ Edit</a>
-            </li>
+              <form method="POST" action="{% url 'delete_task' task.id %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" style="margin-left: 10px;">🗑️ Delete</button>
+              </form>
+            </div>
+          </li>
           {% endfor %}
         </ul>
-        <form method="POST" action="{% url 'remove_all_tasks' %}">
-          {% csrf_token %}
-          <button type="submit" class="remove-btn">🗑️ Remove All Tasks</button>
-        </form>
-      {% else %}
-        <p class="no-tasks">No tasks added yet. Add one above! ✍️</p>
-      {% endif %}
+        {% else %}
+          <p class="no-tasks">No tasks added yet. Add one above! ✍️</p>
+        {% endif %}
+      </div>
+      <form method="POST" action="{% url 'remove_all_tasks' %}">
+        {% csrf_token %}
+        <button type="submit" class="remove-btn">🗑️ Remove All Tasks</button>
+      </form>
     </div>
   </div>
 
   <script>
     function addTaskField() {
-      let container = document.getElementById("task-fields");
-
-      let taskEntry = document.createElement("div");
+      const container = document.getElementById("task-fields");
+      const taskEntry = document.createElement("div");
       taskEntry.classList.add("task-entry");
 
-      let inputField = document.createElement("input");
-      inputField.setAttribute("type", "text");
-      inputField.setAttribute("name", "task[]");
-      inputField.setAttribute("placeholder", "Enter a task...");
-      inputField.required = true;
-
-      let selectField = document.createElement("select");
-      selectField.setAttribute("name", "status[]");
-      selectField.innerHTML = `
-        <option value="not_completed">Not Completed</option>
-        <option value="in_progress">In Progress</option>
-        <option value="completed">Completed</option>
+      taskEntry.innerHTML = `
+        <input type="text" name="task[]" placeholder="Enter a task..." required>
+        <select name="status[]">
+          <option value="not_completed">Not Completed</option>
+          <option value="in_progress">In Progress</option>
+          <option value="completed">Completed</option>
+        </select>
+        <input type="datetime-local" name="due_date[]" placeholder="Due Date & Time">
       `;
-
-      let dateField = document.createElement("input");
-      dateField.setAttribute("type", "date");
-      dateField.setAttribute("name", "due_date[]");
-
-      taskEntry.appendChild(inputField);
-      taskEntry.appendChild(selectField);
-      taskEntry.appendChild(dateField);
       container.appendChild(taskEntry);
     }
+
+    function toggleStatus(taskId) {
+      fetch(`/tasks/${taskId}/update_status/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: new URLSearchParams({})
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          const statusMap = {
+            "not_completed": "❌ Not Completed",
+            "in_progress": "🔄 In Progress",
+            "completed": "✅ Completed"
+          };
+          document.getElementById("status-" + taskId).innerHTML = statusMap[data.new_status];
+        }
+      });
+    }
+
+    document.getElementById("filter_status").addEventListener("change", function() {
+      document.getElementById("filter-form").submit();
+    });
   </script>
 </body>
 </html>

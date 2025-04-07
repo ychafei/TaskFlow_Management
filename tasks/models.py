@@ -11,7 +11,7 @@ class Task(models.Model):
     title = models.CharField(max_length=255)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='not_completed')
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
-    due_date = models.DateField(null=True, blank=True)  
-    
+    due_date = models.DateTimeField(null=True, blank=True)  # Updated to store both date and time
+
     def __str__(self):
         return self.title

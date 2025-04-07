@@ -4,6 +4,8 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LogoutView
 from .forms import CustomUserCreationForm, EditProfileForm
+from django.views.decorators.http import require_POST
+
 
 
 def signup_view(request):
@@ -37,6 +39,12 @@ class CustomLogoutView(LogoutView):
 @login_required
 def profile_view(request):
     return render(request, "accounts/profile.html")
+
+@login_required
+@require_POST
+def remove_all_tasks(request):
+    Task.objects.filter(user=request.user).delete()
+    return redirect("task_list")
 
 
 @login_required

@@ -55,15 +55,17 @@
         .btn-submit:hover {
             background-color: #0056b3;
         }
-        .signup-link {
+        .signup-link, .guest-link {
             margin-top: 15px;
             text-align: center;
         }
-        .signup-link a {
+        .signup-link a,
+        .guest-link a {
             color: #007bff;
             text-decoration: none;
         }
-        .signup-link a:hover {
+        .signup-link a:hover,
+        .guest-link a:hover {
             text-decoration: underline;
         }
     </style>
@@ -85,6 +87,9 @@
         </form>
         <div class="signup-link">
             Don't have an account? <a href="{% url 'signup' %}">Sign up here</a>
+        </div>
+        <div class="guest-link">
+            Or <a href="{% url 'task_list' %}">Sign in as Guest</a>
         </div>
     </div>
 </body>

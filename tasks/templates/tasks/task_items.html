@@ -1,0 +1,32 @@
+{% for task in tasks %}
+  <li>
+    <span>
+      {{ task.title }} -
+      <span class="status">
+        {% if task.status == "completed" %}✅ Completed
+        {% elif task.status == "in_progress" %}🔄 In Progress
+        {% else %}❌ Not Completed
+        {% endif %}
+      </span>
+      {% if task.due_date %}
+        <br>
+        <small>Due: {{ task.due_date|date:'M d, Y h:i A' }}</small>
+      {% endif %}
+      {% if task.days_left is not None %}
+        <br>
+        {% if task.overdue %}
+          <small style="color: red;">Overdue by {{ task.abs_days_left }} day(s)</small>
+        {% else %}
+          <small>Due in {{ task.days_left }} day(s)</small>
+        {% endif %}
+      {% endif %}
+    </span>
+    <div>
+      <a href="{% url 'edit_task' task.id %}">✏️ Edit</a>
+      <form method="POST" action="{% url 'delete_task' task.id %}" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" style="margin-left: 10px;">🗑️ Delete</button>
+      </form>
+    </div>
+  </li>
+{% endfor %}
