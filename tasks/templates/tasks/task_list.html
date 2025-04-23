@@ -100,16 +100,34 @@
       </form>
     </div>
 
+    <!-- FILTER / SEARCH / SORT CONTROLS -->
     <form method="GET" id="filter-form" class="filter-form">
+      <input
+        type="text"
+        id="search-box"
+        name="search"
+        placeholder="🔍 Search tasks…"
+        value="{{ search }}"
+        style="width:40%; display:inline-block; margin-right:10px;"
+      >
+
       <label for="filter_status">Filter by Status:</label>
-      <select name="filter_status" id="filter_status">
-        <option value="all" {% if filter_status == "all" %}selected{% endif %}>All</option>
-        <option value="not_completed" {% if filter_status == "not_completed" %}selected{% endif %}>Not Completed</option>
-        <option value="in_progress" {% if filter_status == "in_progress" %}selected{% endif %}>In Progress</option>
-        <option value="completed" {% if filter_status == "completed" %}selected{% endif %}>Completed</option>
+      <select name="filter_status" id="filter_status" style="width:auto; display:inline-block; margin-right:10px;">
+        <option value="all"           {% if filter_status == 'all'           %}selected{% endif %}>All</option>
+        <option value="not_completed" {% if filter_status == 'not_completed' %}selected{% endif %}>Not Completed</option>
+        <option value="in_progress"   {% if filter_status == 'in_progress'   %}selected{% endif %}>In Progress</option>
+        <option value="completed"     {% if filter_status == 'completed'     %}selected{% endif %}>Completed</option>
+      </select>
+
+      <label for="sort-by">Sort by:</label>
+      <select name="sort_by" id="sort-by" style="width:auto; display:inline-block;">
+        <option value="due_date" {% if sort_by == 'due_date' %}selected{% endif %}>Due Date</option>
+        <option value="title"    {% if sort_by == 'title'    %}selected{% endif %}>Title</option>
+        <option value="status"   {% if sort_by == 'status'   %}selected{% endif %}>Status</option>
       </select>
     </form>
 
+    <!-- NEW TASK FORM -->
     <form method="POST">
       {% csrf_token %}
       <div id="task-fields">
@@ -127,6 +145,7 @@
       <button type="submit">✅ Submit Tasks</button>
     </form>
 
+    <!-- EXISTING TASKS -->
     <div class="task-list">
       <h2>📌 Existing Tasks</h2>
       <div id="task-container">
@@ -139,8 +158,7 @@
               <span class="status" id="status-{{ task.id }}" onclick="toggleStatus({{ task.id }})">
                 {% if task.status == "completed" %}✅ Completed
                 {% elif task.status == "in_progress" %}🔄 In Progress
-                {% else %}❌ Not Completed
-                {% endif %}
+                {% else %}❌ Not Completed{% endif %}
               </span>
               {% if task.due_date %}<br>
                 <small>Due: {{ task.due_date|date:'M d, Y h:i A' }}</small>
@@ -175,11 +193,41 @@
   </div>
 
   <script>
+    const searchBox     = document.getElementById("search-box");
+    const statusFilter  = document.getElementById("filter_status");
+    const sortDropdown  = document.getElementById("sort-by");
+    const filterForm    = document.getElementById("filter-form");
+    const taskContainer = document.getElementById("task-container");
+
+    function fetchFilteredTasks() {
+      const q      = encodeURIComponent(searchBox.value);
+      const status = statusFilter.value;
+      const sortBy = sortDropdown.value;
+
+      fetch(`/tasks/?search=${q}&filter_status=${status}&sort_by=${sortBy}`)
+        .then(res => res.text())
+        .then(html => {
+          const doc = new DOMParser().parseFromString(html, 'text/html');
+          taskContainer.innerHTML = doc.getElementById("task-container").innerHTML;
+        });
+    }
+
+    // Prevent the normal GET submit and do AJAX instead
+    filterForm.addEventListener("submit", e => {
+      e.preventDefault();
+      fetchFilteredTasks();
+    });
+
+    // Wire up live events
+    searchBox.addEventListener("input",    fetchFilteredTasks);
+    statusFilter.addEventListener("change",fetchFilteredTasks);
+    sortDropdown.addEventListener("change",fetchFilteredTasks);
+
+    // Your existing helpers:
     function addTaskField() {
       const container = document.getElementById("task-fields");
       const taskEntry = document.createElement("div");
       taskEntry.classList.add("task-entry");
-
       taskEntry.innerHTML = `
         <input type="text" name="task[]" placeholder="Enter a task..." required>
         <select name="status[]">
@@ -204,19 +252,15 @@
       .then(res => res.json())
       .then(data => {
         if (data.success) {
-          const statusMap = {
+          const map = {
             "not_completed": "❌ Not Completed",
-            "in_progress": "🔄 In Progress",
-            "completed": "✅ Completed"
+            "in_progress":   "🔄 In Progress",
+            "completed":     "✅ Completed"
           };
-          document.getElementById("status-" + taskId).innerHTML = statusMap[data.new_status];
+          document.getElementById("status-" + taskId).innerHTML = map[data.new_status];
         }
       });
     }
-
-    document.getElementById("filter_status").addEventListener("change", function() {
-      document.getElementById("filter-form").submit();
-    });
   </script>
 </body>
 </html>

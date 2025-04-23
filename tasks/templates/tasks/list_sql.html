@@ -25,12 +25,14 @@
       color: #2c3e50;
       margin-bottom: 25px;
     }
-    #sort-by {
+    #search-box, #sort-by {
       padding: 10px;
       border-radius: 6px;
       border: 1px solid #ccc;
       margin-bottom: 20px;
+      width: 100%;
     }
+    #sort-by { width: auto; display: inline-block; }
     ul { list-style: none; padding: 0; }
     li {
       background-color: #f8fafc;
@@ -52,6 +54,14 @@
   <div class="container">
     <h1>📊 SQL Task Viewer</h1>
 
+    <!-- Search box -->
+    <input 
+      type="text" 
+      id="search-box" 
+      placeholder="🔍 Search tasks by title..."
+    >
+
+    <!-- Sort dropdown -->
     <label for="sort-by">Sort by:</label>
     <select id="sort-by">
       <option value="title">Title</option>
@@ -63,7 +73,7 @@
       {% for task in tasks %}
         <li>
           <span>
-            {{ task.title }} -
+            {{ task.title }} –
             <span class="status">
               {% if task.status == "completed" %}✅ Completed
               {% elif task.status == "in_progress" %}🔄 In Progress
@@ -82,17 +92,24 @@
   </div>
 
   <script>
-    document.getElementById('sort-by').addEventListener('change', function() {
-      const sortBy = this.value;
-      fetch(`/tasks/sql/tasks/?sort_by=${sortBy}`)
+    const searchBox    = document.getElementById('search-box');
+    const sortDropdown = document.getElementById('sort-by');
+    const taskList     = document.getElementById('task-list');
+
+    function fetchFilteredTasks() {
+      const q      = encodeURIComponent(searchBox.value);
+      const sortBy = sortDropdown.value;
+      fetch(`/tasks/sql/tasks/?search=${q}&sort_by=${sortBy}`)
         .then(res => res.text())
         .then(html => {
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(html, 'text/html');
-          const newList = doc.getElementById('task-list');
-          document.getElementById('task-list').innerHTML = newList.innerHTML;
+          const doc     = new DOMParser().parseFromString(html, 'text/html');
+          const newList = doc.getElementById('task-list').innerHTML;
+          taskList.innerHTML = newList;
         });
-    });
+    }
+
+    searchBox.addEventListener('input', fetchFilteredTasks);
+    sortDropdown.addEventListener('change', fetchFilteredTasks);
   </script>
 </body>
 </html>
